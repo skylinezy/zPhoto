@@ -11,7 +11,7 @@ import SwiftUI
 struct zPhotoApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainView()
         }
     }
 }
