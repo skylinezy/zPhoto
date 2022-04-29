@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		15E1F98227FE23F5006DB3F8 /* ImageDetailInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15E1F98127FE23F5006DB3F8 /* ImageDetailInfoView.swift */; };
 		15E1F9842803CC64006DB3F8 /* ImageItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15E1F9832803CC64006DB3F8 /* ImageItem.swift */; };
+		15E1F9862808A2E6006DB3F8 /* StarRate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15E1F9852808A2E6006DB3F8 /* StarRate.swift */; };
 		15EB6D5C27F68F94003CA437 /* zPhotoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15EB6D5B27F68F94003CA437 /* zPhotoApp.swift */; };
 		15EB6D6027F68F9B003CA437 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 15EB6D5F27F68F9B003CA437 /* Assets.xcassets */; };
 		15EB6D6327F68F9B003CA437 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 15EB6D6227F68F9B003CA437 /* Preview Assets.xcassets */; };
@@ -25,6 +26,7 @@
 /* Begin PBXFileReference section */
 		15E1F98127FE23F5006DB3F8 /* ImageDetailInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDetailInfoView.swift; sourceTree = "<group>"; };
 		15E1F9832803CC64006DB3F8 /* ImageItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageItem.swift; sourceTree = "<group>"; };
+		15E1F9852808A2E6006DB3F8 /* StarRate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StarRate.swift; sourceTree = "<group>"; };
 		15EB6D5827F68F94003CA437 /* zPhoto.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = zPhoto.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		15EB6D5B27F68F94003CA437 /* zPhotoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = zPhotoApp.swift; sourceTree = "<group>"; };
 		15EB6D5F27F68F9B003CA437 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -100,6 +102,7 @@
 			children = (
 				15EB6D7E27F777DD003CA437 /* fakeImage.swift */,
 				15E1F9832803CC64006DB3F8 /* ImageItem.swift */,
+				15E1F9852808A2E6006DB3F8 /* StarRate.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -193,6 +196,7 @@
 				15E1F98227FE23F5006DB3F8 /* ImageDetailInfoView.swift in Sources */,
 				15EB6D5C27F68F94003CA437 /* zPhotoApp.swift in Sources */,
 				15EB6D6F27F69243003CA437 /* DirectoryView.swift in Sources */,
+				15E1F9862808A2E6006DB3F8 /* StarRate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

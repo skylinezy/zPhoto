@@ -8,13 +8,18 @@
 import SwiftUI
 
 struct MainView: View {
+    
+    @ObservedObject var sourceModel : SourceModel = .init()
+    
     var body: some View {
         NavigationView {
             DirectoryView()
                 .frame(minWidth: 200)
+                .environmentObject(sourceModel)
             
             ContentsView()
                 .frame(minWidth: 1200)
+                .environmentObject(sourceModel)
         }
         .frame(minWidth: 800, minHeight: 600)
     }

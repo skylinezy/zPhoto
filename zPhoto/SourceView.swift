@@ -63,18 +63,20 @@ struct FolderItemView: View {
             Text(item.label)
                 .fontWeight(.regular)
                 .padding(.horizontal, 2)
+            Spacer()
         }
     }
 }
 
 struct SourceView: View {
     let fake_Folders : [FolderItem] = [
-        .init(icon: "folder.fill", label: "DCIM", level: 0),
-        .init(icon: "folder.fill", label: "FUJI_001", level: 1),
-        .init(icon: "folder.fill", label: "JPEG", level:2)
+        .init(icon: "folder.fill", label: "DCIM", level: 1),
+        .init(icon: "folder.fill", label: "FUJI_001", level: 2),
+        .init(icon: "folder.fill", label: "JPEG", level:3)
     ]
     
     var title : String = "SourceView"
+    @State var selectedLabel : String = ""
     
     var body: some View {
         VStack(spacing: 2) {
@@ -82,10 +84,17 @@ struct SourceView: View {
             List {
                 ForEach(fake_Folders, id: \.self) { folderItem in
                     FolderItemView(item: folderItem)
+                    .padding(.vertical, 5)
+                    .background(Rectangle()
+                                    .fill()
+                                    .foregroundColor(selectedLabel == folderItem.label ? Color.blue : Color.clear)
+                                    .cornerRadius(4))
+                    .onTapGesture{
+                        selectedLabel = folderItem.label
+                    }
                 }
             }
         }
-        .padding(5)
     }
 }
 

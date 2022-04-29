@@ -9,20 +9,15 @@ import SwiftUI
 
 let kIconSize: CGFloat = 18
 
-enum StarRate: Int8, Comparable{
-    static func < (lhs: StarRate, rhs: StarRate) -> Bool {
-        return lhs.rawValue < rhs.rawValue
-    }
-    
-    case Zero   = 0
-    case One    = 1
-    case Two    = 2
-    case Three  = 3
-    case Four   = 4
-    case Five   = 5
+enum MarkersViewMode: Int8 {
+    case Large = 0
+    case Small = 1
 }
 
 struct ImageControlBar: View {
+    @EnvironmentObject var sourceModel : SourceModel
+    @ObservedObject var viewModel: ContentSelectionModel
+    
     @Binding var zoomLevel : Int8
     var onNext: () -> Void
     var onPrev: () -> Void
@@ -30,7 +25,7 @@ struct ImageControlBar: View {
     var body: some View {
         HStack(spacing: 20){
             Button(action:{
-                onPrev()
+                viewModel.selectedImage = sourceModel.prev()
             }) {
                 Image(systemName: "chevron.left")
                     .font(Font.system(size: kIconSize, weight: .regular))
@@ -62,7 +57,7 @@ struct ImageControlBar: View {
             .buttonStyle(.plain)
             
             Button(action:{
-                onNext()
+                viewModel.selectedImage = sourceModel.next()
             }) {
                 Image(systemName: "chevron.right")
                     .font(Font.system(size: kIconSize, weight: .regular))
@@ -71,11 +66,6 @@ struct ImageControlBar: View {
             .buttonStyle(.plain)
         }
     }
-}
-
-enum MarkersViewMode: Int8 {
-    case Large = 0
-    case Small = 1
 }
 
 struct BookmarkView: View {
@@ -212,8 +202,9 @@ struct ImageSummaryView: View {
             HStack{
                 Text(imageItem.filename)
                     .font(.title)
-                ImageFormatLabel(format: "JPEG")
-                ImageFormatLabel(format: "RAW")
+                ForEach(imageItem.formats, id: \.self) { format in
+                    ImageFormatLabel(format: format)
+                }
             }
             Text("3820 x 1980")
             Text("\(imageItem.exifInfo.FNumber) / \(imageItem.exifInfo.FocalLength) / ISO\(imageItem.exifInfo.ISOSpeed) / \(imageItem.exifInfo.ShutterSpeed)")
@@ -221,87 +212,152 @@ struct ImageSummaryView: View {
     }
 }
 
+struct ToolbarView: View {
+    @EnvironmentObject var sourceModel : SourceModel
+    @ObservedObject var viewModel: ContentSelectionModel
+    
+    @Binding var zoomLevel: Int8
+    @Binding var showingDetailInfo: Bool
+    
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            ImageControlBar(viewModel:viewModel, zoomLevel: $zoomLevel, onNext: {}, onPrev: {})
+                .environmentObject(sourceModel)
+            
+            HStack(alignment: .bottom, spacing: 20) {
+                
+                ImageSummaryView(imageItem: $viewModel.selectedImage)
+                    .frame(width: 250)
+                    .offset(x: showingDetailInfo ? -300 : 0)
+                
+                Button(action:{
+                    showingDetailInfo.toggle()
+                }) {
+                    Image(systemName: showingDetailInfo ? "info.circle.fill": "info.circle")
+                        .font(Font.system(size: kIconSize, weight: .regular))
+                        .foregroundColor(.white)
+                }
+                .buttonStyle(.plain)
+                
+                Button(action:{
+                    
+                }) {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(Font.system(size: kIconSize, weight: .regular))
+                        .foregroundColor(.white)
+                }
+                .buttonStyle(.plain)
+                
+                Spacer()
+            }//: HStack
+            
+            HStack {
+                Spacer()
+                
+                BookmarkView(mode: .Large, onChange: {_ in }, checked: $viewModel.selectedImage.marked)
+                
+                StarRatingView(mode: .Large, onChange: {_ in }, currentRating: $viewModel.selectedImage.rating)
+                    .frame(height: 20)
+                
+            }//: HStack
+        }//: ZStack
+        .padding(.horizontal, 30)
+        .padding(.vertical, 20)
+        .background(LinearGradient(gradient: Gradient(colors:[Color(red: 0, green: 0, blue: 0, opacity: 0.0), Color(red: 0, green: 0, blue: 0, opacity: 0.75)]), startPoint: .top, endPoint: .bottom))
+    }
+}
+
+// Selection model
 class ContentSelectionModel: ObservableObject {
     @Published var selectedImage : ImageItem = placeholderImage
     @Published var hasSelection : Bool = false
 }
 
+class SourceModel: ObservableObject {
+    private var currentIndex : Int = 0
+    @Published var imageItems : [ImageItem] = []
+    @Published var primaryDirPath : String {
+        didSet {
+            
+        }
+    }
+    @Published var secondaryDirPath: String {
+        didSet {
+            
+        }
+    }
+    
+    init() {
+        imageItems = fakeImages
+        primaryDirPath = ""
+        secondaryDirPath = ""
+    }
+    
+    func next() -> ImageItem {
+        currentIndex += 1
+        currentIndex = min(currentIndex, imageItems.count-1)
+        return imageItems[currentIndex]
+    }
+    func prev() -> ImageItem {
+        currentIndex -= 1
+        currentIndex = max(0, currentIndex)
+        return imageItems[currentIndex]
+    }
+    
+}
+
 struct ContentsView: View {
+    @EnvironmentObject var sourceModel : SourceModel
     @ObservedObject var viewModel : ContentSelectionModel = ContentSelectionModel()
     
     @State var showingDetailInfo: Bool = false
     @State var zoomLevel: Int8 = 0
     
+    @GestureState var magnifyFactor = 1.0
+    
+    var magnification: some Gesture {
+        MagnificationGesture()
+            .updating($magnifyFactor) {currentState, gestureState, transaction in
+                gestureState = currentState
+            }
+    }
+    
     var body: some View {
         VSplitView {
-            ZStack(alignment: .bottom) {
-                
-                Image(viewModel.selectedImage.filename)
-                    .resizable()
-                    .scaledToFit()
-                    .cornerRadius(5)
-                    .padding(10)
-                    .shadow(radius: 10)
-                
+            GeometryReader {proxy in
                 ZStack(alignment: .bottom) {
-                    ImageControlBar(zoomLevel: $zoomLevel, onNext: {}, onPrev: {})
-                    
-                    HStack(alignment: .bottom, spacing: 20) {
-                        
-                        ImageSummaryView(imageItem: $viewModel.selectedImage)
-                            .frame(width: 250)
-                            .offset(x: showingDetailInfo ? -300 : 0)
-
-                        Button(action:{
-                            showingDetailInfo.toggle()
-                        }) {
-                            Image(systemName: showingDetailInfo ? "info.circle.fill": "info.circle")
-                                .font(Font.system(size: kIconSize, weight: .regular))
-                                .foregroundColor(.white)
-                        }
-                        .buttonStyle(.plain)
-                        
-                        Button(action:{
-                            
-                        }) {
-                            Image(systemName: "square.and.arrow.up")
-                                .font(Font.system(size: kIconSize, weight: .regular))
-                                .foregroundColor(.white)
-                        }
-                        .buttonStyle(.plain)
-                        
-                        Spacer()
-                    }//: HStack
-                    
-                    HStack {
-                        Spacer()
-                        
-                        BookmarkView(mode: .Large, onChange: {_ in }, checked: $viewModel.selectedImage.marked)
-                        
-                        StarRatingView(mode: .Large, onChange: {_ in }, currentRating: $viewModel.selectedImage.rating)
-                            .frame(height: 20)
-                        
-                    }//: HStack
+                    Image(viewModel.selectedImage.filename)
+                        .resizable()
+                        .aspectRatio(contentMode: magnifyFactor > 1.0 ? .fill : .fit)
+                        .scaleEffect(magnifyFactor)
+                        .cornerRadius(5)
+                        .padding(15)
+                        .shadow(radius: 10)
+                        .gesture(magnification)
                 }//: ZStack
-                .padding(.horizontal, 30)
-                .padding(.vertical, 20)
-                .background(LinearGradient(gradient: Gradient(colors:[Color(red: 0, green: 0, blue: 0, opacity: 0.0), Color(red: 0, green: 0, blue: 0, opacity: 0.75)]), startPoint: .top, endPoint: .bottom))
-                
-            }//: ZStack
+                .frame(width: proxy.size.width, height: proxy.size.height, alignment: .center) // GeometryReader uses top alignment for all its subviews. Force the subviews to aligned center.
+            }//:
             .frame(minHeight: 600)
             .opacity(viewModel.hasSelection ? 1.0 : 0.0)
             .overlay(
-                ImageDetailInfoView(info: $viewModel.selectedImage)
-                    .frame(width: 220, alignment: .leading)
-                    .padding(.horizontal, 30)
-                    .padding(.top, 50)
-                    .background(LinearGradient(gradient: Gradient(colors:[Color(red: 0, green: 0, blue: 0, opacity: 0.0), Color(red: 0, green: 0, blue: 0, opacity: 0.95)]), startPoint: .trailing, endPoint: .leading))
-                    .opacity(showingDetailInfo ? 1.0 : 0.0)
+                ZStack(alignment: .bottomLeading) {
+                    if (viewModel.hasSelection) {
+                        ToolbarView(viewModel: viewModel, zoomLevel: $zoomLevel, showingDetailInfo: $showingDetailInfo)
+                            .environmentObject(sourceModel)
+                    }
+                    
+                    ImageDetailInfoView(info: $viewModel.selectedImage)
+                        .frame(width: 220, alignment: .leading)
+                        .padding(.horizontal, 30)
+                        .padding(.top, 50)
+                        .background(LinearGradient(gradient: Gradient(colors:[Color(red: 0, green: 0, blue: 0, opacity: 0.0), Color(red: 0, green: 0, blue: 0, opacity: 0.95)]), startPoint: .trailing, endPoint: .leading))
+                        .opacity(showingDetailInfo ? 1.0 : 0.0)
+                        .animation(.easeIn(duration: 0.1))
+                }
                 , alignment: .leading)
             
             ImageListView(selected: viewModel)
                 .frame(minHeight: 100)
-                .padding(.vertical, 20)
         }
         .background(Color.black)
     }
@@ -331,5 +387,3 @@ struct ContentsView_Previews: PreviewProvider {
         }
     }
 }
-
-

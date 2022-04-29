@@ -7,15 +7,7 @@
 
 import SwiftUI
 
-enum ListZoomLevel: Int8 {
-    case Small = 0
-    case Medium = 1
-    case Large = 2
-}
-
 struct ImageListControlBar: View {
-    @Binding var zoomLevel : ListZoomLevel
-    
     var body: some View {
         Text("Image List ToolBar")
     }
@@ -54,16 +46,15 @@ struct ImageListItem: View {
 
 struct ImageListView: View {
     @ObservedObject var selected : ContentSelectionModel
-    @State var zoomLevel: ListZoomLevel = .Medium
     
     var body: some View {
         
         VStack {
-            ImageListControlBar(zoomLevel: $zoomLevel)
+            ImageListControlBar()
                 .frame(height:20)
                 .padding(.vertical, 2)
             
-            ScrollView(.horizontal){
+            ScrollView(.horizontal, showsIndicators: true){
                 LazyHStack(spacing: 10) {
                     ForEach(fakeImages, id: \.self.id) {image in
                         ZStack{

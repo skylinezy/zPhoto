@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct DirectoryView: View {
+    @EnvironmentObject var sourceModel : SourceModel
+    
     var body: some View {
         VStack {
             SourceView(title: "FUJI_1")
